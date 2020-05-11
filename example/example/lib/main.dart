@@ -87,3 +87,20 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
+String _buildHTML(final String htmlTemplate) {
+  return HTMLBuilder.build(
+    htmlTemplate: htmlTemplate,
+    backgroundColor: new Color(0xFFFFFF),
+    src: '/model',
+    // alt: widget.alt,
+    // ar: widget.ar,
+    // arModes: widget.arModes,
+    // arScale: widget.arScale,
+    // autoRotate: widget.autoRotate,
+    // autoRotateDelay: widget.autoRotateDelay,
+    // autoPlay: widget.autoPlay,
+    // cameraControls: widget.cameraControls,
+    // iosSrc: widget.iosSrc,
+  );
+}
