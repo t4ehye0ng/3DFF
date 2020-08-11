@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:js/js.dart';
+
+// NOTE: https://github.com/dart-lang/sdk/issues/36557
+// You can only use package:js on the Web where Dart compiles to JavaScript, you can't use it in Flutter because there Dart is executed natively on the Dart VM.
+// import 'package:js/js.dart';
 
 void main() => runApp(MyApp());
 
