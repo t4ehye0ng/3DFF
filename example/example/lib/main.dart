@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:model_viewer/model_viewer.dart';
+// import 'package:webview_flutter/webview_flutter.dart';
 
 // NOTE: https://github.com/dart-lang/sdk/issues/36557
 // You can only use package:js on the Web where Dart compiles to JavaScript, you can't use it in Flutter because there Dart is executed natively on the Dart VM.
@@ -76,12 +77,13 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: WebView(
-          initialUrl: 'https://threejs.org/examples/#webgl_camera_cinematic',
-          javascriptMode: JavascriptMode.unrestricted,
-          onPageFinished: (String url) {
-            print('finished: ' + url);
-          }),
+      body: ModelViewer(
+        src: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
+        alt: "A 3D model of an astronaut",
+        ar: true,
+        autoRotate: true,
+        cameraControls: true,
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
