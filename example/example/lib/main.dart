@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:model_viewer/model_viewer.dart';
+// import 'package:model_viewer/model_viewer.dart';
+import 'package:ThreeDFF/ThreeDFF.dart';
 // import 'package:webview_flutter/webview_flutter.dart';
 
 // NOTE: https://github.com/dart-lang/sdk/issues/36557
@@ -77,13 +78,16 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: ModelViewer(
-        src: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
-        alt: "A 3D model of an astronaut",
-        ar: true,
-        autoRotate: true,
-        cameraControls: true,
+      body: ThreeDFF(
+        src: 'https://modelviewer.dev/shared-assets/models/Horse.glb',
       ),
+      // body: ModelViewer(
+      //   src: 'https://modelviewer.dev/shared-assets/models/Horse.glb',
+      //   alt: "A 3D model of an astronaut",
+      //   ar: true,
+      //   autoRotate: true,
+      //   cameraControls: true,
+      // ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
