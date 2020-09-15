@@ -1,4 +1,5 @@
 import 'dart:async' show Completer;
+
 import 'dart:convert' show utf8;
 import 'dart:io'
     show File, HttpRequest, HttpServer, HttpStatus, InternetAddress, Platform;
@@ -9,8 +10,6 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_android/android_content.dart' as android_content;
 import 'package:webview_flutter/platform_interface.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-
-// import 'html_builder.dart';
 
 class ThreeDFF extends StatefulWidget {
   ThreeDFF({Key key, @required this.src}) : super(key: key);
@@ -30,18 +29,32 @@ class _ThreeDFFState extends State<ThreeDFF> {
 
   @override
   Widget build(final BuildContext context) {
+    final JavascriptChannel c = new JavascriptChannel(
+        name: 'Print',
+        onMessageReceived: (JavascriptMessage message) {
+          print(message.message);
+        });
     return WebView(
       initialUrl: null,
       javascriptMode: JavascriptMode.unrestricted,
+      javascriptChannels: <JavascriptChannel>[
+        JavascriptChannel(
+            name: 'Print',
+            onMessageReceived: (JavascriptMessage msg) {
+              print(msg);
+            }),
+      ].toSet(),
+      debuggingEnabled: true,
       initialMediaPlaybackPolicy: AutoMediaPlaybackPolicy.always_allow,
       onWebViewCreated: (final WebViewController webViewController) async {
         _controller.complete(webViewController);
         // final host = _proxy.address.address;
         // final port = _proxy.port;
         // final url = "http://$host:$port/";
-        // print('>>>> ModelViewer initializing... <$url>'); // DEBUG
-        final url = "https://clo-set.com/";
-        await webViewController.loadUrl(url);
+        print('>>>> ModelViewer initializing... '); // DEBUG
+        final url = "https://threejs.org/examples/#webgl_animation_keyframes/";
+        webViewController.evaluateJavascript("window.alert('alert!')");
+        webViewController.evaluateJavascript("console.log('alert!')");
       },
       navigationDelegate: (final NavigationRequest navigation) async {
         //print('>>>> ModelViewer wants to load: <${navigation.url}>'); // DEBUG
@@ -71,10 +84,7 @@ class _ThreeDFFState extends State<ThreeDFF> {
         return NavigationDecision.prevent;
       },
       onPageStarted: (final String url) {
-        //print('>>>> ModelViewer began loading: <$url>'); // DEBUG
-      },
-      onPageFinished: (final String url) {
-        //print('>>>> ModelViewer finished loading: <$url>'); // DEBUG
+        print('>>>> ModelViewer finished loading: <$url>'); // DEBUG
       },
       onWebResourceError: (final WebResourceError error) {
         print(
@@ -82,4 +92,21 @@ class _ThreeDFFState extends State<ThreeDFF> {
       },
     );
   }
+
+  // String _buildHTML(final String htmlTemplate) {
+  //   return HTMLBuilder.build(
+  //     htmlTemplate: htmlTemplate,
+  //     backgroundColor: widget.backgroundColor,
+  //     src: '/model',
+  //     // alt: widget.alt,
+  //     // ar: widget.ar,
+  //     // arModes: widget.arModes,
+  //     // arScale: widget.arScale,
+  //     // autoRotate: widget.autoRotate,
+  //     // autoRotateDelay: widget.autoRotateDelay,
+  //     // autoPlay: widget.autoPlay,
+  //     // cameraControls: widget.cameraControls,
+  //     // iosSrc: widget.iosSrc,
+  //   );
+  // }
 }
