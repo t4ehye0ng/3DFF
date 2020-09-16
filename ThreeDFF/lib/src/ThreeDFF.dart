@@ -48,11 +48,8 @@ class _ThreeDFFState extends State<ThreeDFF> {
       initialMediaPlaybackPolicy: AutoMediaPlaybackPolicy.always_allow,
       onWebViewCreated: (final WebViewController webViewController) async {
         _controller.complete(webViewController);
-        // final host = _proxy.address.address;
-        // final port = _proxy.port;
-        // final url = "http://$host:$port/";
         print('>>>> ModelViewer initializing... '); // DEBUG
-        final url = "https://threejs.org/examples/#webgl_animation_keyframes/";
+        // final url = "https://threejs.org/examples/#webgl_animation_keyframes/";
         webViewController.evaluateJavascript("window.alert('alert!')");
         webViewController.evaluateJavascript("console.log('alert!')");
       },
@@ -92,21 +89,4 @@ class _ThreeDFFState extends State<ThreeDFF> {
       },
     );
   }
-
-  // String _buildHTML(final String htmlTemplate) {
-  //   return HTMLBuilder.build(
-  //     htmlTemplate: htmlTemplate,
-  //     backgroundColor: widget.backgroundColor,
-  //     src: '/model',
-  //     // alt: widget.alt,
-  //     // ar: widget.ar,
-  //     // arModes: widget.arModes,
-  //     // arScale: widget.arScale,
-  //     // autoRotate: widget.autoRotate,
-  //     // autoRotateDelay: widget.autoRotateDelay,
-  //     // autoPlay: widget.autoPlay,
-  //     // cameraControls: widget.cameraControls,
-  //     // iosSrc: widget.iosSrc,
-  //   );
-  // }
 }
