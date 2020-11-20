@@ -1,20 +1,86 @@
 import 'dart:async' show Completer;
-// import 'dart:convert' show utf8;
+import 'dart:convert' show utf8;
 import 'dart:io'
     show File, HttpRequest, HttpServer, HttpStatus, InternetAddress, Platform;
-// import 'dart:typed_data' show Uint8List;
+import 'dart:typed_data' show Uint8List;
 
 import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_android/android_content.dart' as android_content;
 import 'package:webview_flutter/platform_interface.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-class ThreeDFF extends StatefulWidget {
-  ThreeDFF({Key key, @required this.src}) : super(key: key);
+import 'htmlBuilder.dart';
 
+class ThreeDFF extends StatefulWidget {
+  ThreeDFF(
+      {Key key,
+      this.backgroundColor = Colors.black,
+      @required this.src,
+      this.alt,
+      this.ar,
+      this.arModes,
+      this.arScale,
+      this.autoRotate,
+      this.autoRotateDelay,
+      this.autoPlay,
+      this.cameraControls,
+      this.iosSrc})
+      : super(key: key);
+
+  /// The background color for the model viewer.
+  ///
+  /// The theme's [ThemeData.scaffoldBackgroundColor] by default.
+  final Color backgroundColor;
+
+  /// The URL or path to the 3D model. This parameter is required.
+  /// Only glTF/GLB models are supported.
+  ///
+  /// The parameter value must conform to the following:
+  ///
+  /// - `http://` and `https://` for HTTP(S) URLs
+  ///   (for example, `https://modelviewer.dev/shared-assets/models/Astronaut.glb`)
+  ///
+  /// - `file://` for local files
+  ///
+  /// - a relative pathname for Flutter app assets
+  ///   (for example, `assets/MyModel.glb`)
   final String src;
-  final Color backgroundColor = Colors.white;
+
+  /// Configures the model with custom text that will be used to describe the
+  /// model to viewers who use a screen reader or otherwise depend on additional
+  /// semantic context to understand what they are viewing.
+  final String alt;
+
+  /// Enable the ability to launch AR experiences on supported devices.
+  final bool ar;
+
+  /// A prioritized list of the types of AR experiences to enable, if available.
+  final List<String> arModes;
+
+  /// Controls the scaling behavior in AR mode in Scene Viewer. Set to "fixed"
+  /// to disable scaling of the model, which sets it to always be at 100% scale.
+  /// Defaults to "auto" which allows the model to be resized.
+  final String arScale;
+
+  /// Enables the auto-rotation of the model.
+  final bool autoRotate;
+
+  /// Sets the delay before auto-rotation begins. The format of the value is a
+  /// number in milliseconds. The default is 3000.
+  final int autoRotateDelay;
+
+  /// If this is true and a model has animations, an animation will
+  /// automatically begin to play when this attribute is set (or when the
+  /// property is set to true). The default is false.
+  final bool autoPlay;
+
+  /// Enables controls via mouse/touch when in flat view.
+  final bool cameraControls;
+
+  /// The URL to a USDZ model which will be used on supported iOS 12+ devices
+  /// via AR Quick Look.
+  final String iosSrc;
 
   @override
   State<ThreeDFF> createState() => _ThreeDFFState();
@@ -27,40 +93,47 @@ class _ThreeDFFState extends State<ThreeDFF> {
   HttpServer _proxy;
 
   @override
+  void initState() {
+    super.initState();
+    _initProxy();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    if (_proxy != null) {
+      _proxy.close(force: true);
+      _proxy = null;
+    }
+  }
+
+  @override
+  void didUpdateWidget(final ThreeDFF oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // TODO
+  }
+
+  @override
   Widget build(final BuildContext context) {
-    final JavascriptChannel c = new JavascriptChannel(
-        name: 'Print',
-        onMessageReceived: (JavascriptMessage message) {
-          print(message.message);
-        });
+    // final JavascriptChannel c = new JavascriptChannel(
+    //     name: 'Print',
+    //     onMessageReceived: (JavascriptMessage message) {
+    //       print(message.message);
+    //     });
     return WebView(
-      initialUrl: "https://threejs.org/examples/#webgl_animation_cloth",
+      initialUrl: null,
       javascriptMode: JavascriptMode.unrestricted,
-      // javascriptChannels: <JavascriptChannel>[
-      //   JavascriptChannel(
-      //       name: 'Print',
-      //       onMessageReceived: (JavascriptMessage msg) {
-      //         print(msg);
-      //       }),
-      // ].toSet(),
-      debuggingEnabled: true,
       initialMediaPlaybackPolicy: AutoMediaPlaybackPolicy.always_allow,
       onWebViewCreated: (final WebViewController webViewController) async {
         _controller.complete(webViewController);
-        print('>>>> ModelViewer initializing... '); // DEBUG
-        // final url = "https://threejs.org/examples/#webgl_animation_keyframes/";
-
-        // webViewController.evaluateJavascript("""
-        //   var scene = new THREE.Scene();
-        //   var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-
-        //   var renderer = new THREE.WebGLRenderer();
-        //   renderer.setSize( window.innerWidth, window.innerHeight );
-        //   document.body.appendChild( renderer.domElement );
-        // """);
+        final host = _proxy.address.address;
+        final port = _proxy.port;
+        final url = "http://$host:$port/";
+        print('>>>> ModelViewer initializing... <$url>'); // DEBUG
+        await webViewController.loadUrl(url);
       },
       navigationDelegate: (final NavigationRequest navigation) async {
-        //print('>>>> ModelViewer wants to load: <${navigation.url}>'); // DEBUG
+        print('>>>> ModelViewer wants to load: <${navigation.url}>'); // DEBUG
         if (!Platform.isAndroid) {
           return NavigationDecision.navigate;
         }
@@ -87,14 +160,9 @@ class _ThreeDFFState extends State<ThreeDFF> {
         return NavigationDecision.prevent;
       },
       onPageStarted: (final String url) {
-        // onPageStarted: (final String url) {
-        // webViewController.evaluateJavascript("console.log('alert!')");
-        // webViewController.evaluateJavascript("window.alert('alert!')");
-        // webViewController.evaluateJavascript('alert("alert!")');
-        // await webViewController.evaluateJavascript(
-        //     "window.alert = function (e){Alert.postMessage(e);}");
-        // print("done");
-
+        print('>>>> ModelViewer began loading: <$url>'); // DEBUG
+      },
+      onPageFinished: (final String url) {
         print('>>>> ModelViewer finished loading: <$url>'); // DEBUG
       },
       onWebResourceError: (final WebResourceError error) {
@@ -102,5 +170,101 @@ class _ThreeDFFState extends State<ThreeDFF> {
             '>>>> ModelViewer failed to load: ${error.description} (${error.errorType} ${error.errorCode})'); // DEBUG
       },
     );
+  }
+
+  String _buildHTML(final String htmlTemplate) {
+    print("buildHTML");
+    return HTMLBuilder.build(
+      htmlTemplate: htmlTemplate,
+      backgroundColor: widget.backgroundColor,
+      src: '/model',
+      alt: widget.alt,
+      ar: widget.ar,
+      arModes: widget.arModes,
+      arScale: widget.arScale,
+      autoRotate: widget.autoRotate,
+      autoRotateDelay: widget.autoRotateDelay,
+      autoPlay: widget.autoPlay,
+      cameraControls: widget.cameraControls,
+      iosSrc: widget.iosSrc,
+    );
+  }
+
+  Future<void> _initProxy() async {
+    final url = Uri.parse(widget.src);
+    _proxy = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    _proxy.listen((final HttpRequest request) async {
+      //print("${request.method} ${request.uri}"); // DEBUG
+      //print(request.headers); // DEBUG
+      final response = request.response;
+
+      switch (request.uri.path) {
+        case '/':
+        case '/index.html':
+          final htmlTemplate = await rootBundle
+              .loadString('packages/ThreeDFF/assets/template.html');
+          final html = utf8.encode(_buildHTML(htmlTemplate));
+          print("response");
+          response
+            ..statusCode = HttpStatus.ok
+            ..headers.add("Content-Type", "text/html;charset=UTF-8")
+            ..headers.add("Content-Length", html.length.toString())
+            ..add(html);
+          await response.close();
+          print("response closed");
+          break;
+
+        case '/model-viewer.js':
+          print("model-viewer.js");
+          final code =
+              await _readAsset('packages/ThreeDFF/assets/model-viewer.js');
+          response
+            ..statusCode = HttpStatus.ok
+            ..headers
+                .add("Content-Type", "application/javascript;charset=UTF-8")
+            ..headers.add("Content-Length", code.lengthInBytes.toString())
+            ..add(code);
+          await response.close();
+          break;
+
+        case '/model':
+          print("model");
+          if (url.isAbsolute && !url.isScheme("file")) {
+            await response.redirect(url); // TODO: proxy the resource
+          } else {
+            final data = await (url.isScheme("file")
+                ? _readFile(url.path)
+                : _readAsset(url.path));
+            response
+              ..statusCode = HttpStatus.ok
+              ..headers.add("Content-Type", "application/octet-stream")
+              ..headers.add("Content-Length", data.lengthInBytes.toString())
+              ..headers.add("Access-Control-Allow-Origin", "*")
+              ..add(data);
+            await response.close();
+          }
+          break;
+
+        case '/favicon.ico':
+        default:
+          final text = utf8.encode("Resource '${request.uri}' not found");
+          response
+            ..statusCode = HttpStatus.notFound
+            ..headers.add("Content-Type", "text/plain;charset=UTF-8")
+            ..headers.add("Content-Length", text.length.toString())
+            ..add(text);
+          await response.close();
+          break;
+      }
+    });
+  }
+
+  Future<Uint8List> _readAsset(final String key) async {
+    final data = await rootBundle.load(key);
+    return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+  }
+
+  Future<Uint8List> _readFile(final String path) async {
+    return await File(path).readAsBytes();
   }
 }

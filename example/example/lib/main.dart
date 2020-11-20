@@ -80,6 +80,10 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: ThreeDFF(
         src: 'https://modelviewer.dev/shared-assets/models/Horse.glb',
+        alt: "A 3D model of an astronaut",
+        ar: true,
+        autoRotate: true,
+        cameraControls: true,
       ),
       // body: ModelViewer(
       //   src: 'https://modelviewer.dev/shared-assets/models/Horse.glb',
