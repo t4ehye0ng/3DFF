@@ -17,6 +17,7 @@ class ThreeDFF extends StatefulWidget {
       {Key key,
       this.backgroundColor = Colors.black,
       @required this.src,
+      this.geometry,
       this.alt,
       this.ar,
       this.arModes,
@@ -46,6 +47,8 @@ class ThreeDFF extends StatefulWidget {
   /// - a relative pathname for Flutter app assets
   ///   (for example, `assets/MyModel.glb`)
   final String src;
+
+  final String geometry;
 
   /// Configures the model with custom text that will be used to describe the
   /// model to viewers who use a screen reader or otherwise depend on additional
@@ -177,6 +180,7 @@ class _ThreeDFFState extends State<ThreeDFF> {
     return HTMLBuilder.build(
       htmlTemplate: htmlTemplate,
       backgroundColor: widget.backgroundColor,
+      geometry: widget.geometry,
       src: '/model',
       alt: widget.alt,
       ar: widget.ar,

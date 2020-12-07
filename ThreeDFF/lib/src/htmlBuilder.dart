@@ -19,12 +19,13 @@ abstract class HTMLBuilder {
       final int autoRotateDelay,
       final bool autoPlay,
       final bool cameraControls,
+      final String geometry,
       final String iosSrc}) {
     final html = StringBuffer(htmlTemplate);
-    html.write('<model-viewer');
-    html.write(' src="${htmlEscape.convert(src)}"');
-    html.write(
-        ' style="background-color: rgb(${backgroundColor.red}, ${backgroundColor.green}, ${backgroundColor.blue});"');
+    // html.write('<model-viewer');
+    // html.write(' src="${htmlEscape.convert(src)}"');
+    // html.write(
+    //     ' style="background-color: rgb(${backgroundColor.red}, ${backgroundColor.green}, ${backgroundColor.blue});"');
     if (alt != null) {
       html.write(' alt="${htmlEscape.convert(alt)}"');
     }
@@ -48,6 +49,11 @@ abstract class HTMLBuilder {
     if (autoPlay ?? false) {
       html.write(' autoplay');
     }
+
+    if (geometry != null) {
+      html.write(geometry);
+    }
+
     // TODO: skybox-image
     if (cameraControls ?? false) {
       html.write(' camera-controls');
@@ -74,8 +80,33 @@ abstract class HTMLBuilder {
     // TODO: reveal
     // TODO: shadow-intensity
     // TODO: shadow-softness
-    html.writeln('></model-viewer>');
-    print(html.toString());
+    // html.writeln('></model-viewer>');
+    html.write(geometry2);
+    html.write(animate);
+    html.write(bottom);
+
     return html.toString();
   }
 }
+
+final String geometry2 = """
+    const geometry = new THREE.BoxGeometry();
+    const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+    const mesh = new THREE.Mesh( geometry, material );
+    scene.add( mesh );
+""";
+
+final String animate = """
+    const animate = function () {
+        requestAnimationFrame( animate );
+
+        mesh.rotation.x += 0.01;
+        mesh.rotation.y += 0.01;
+
+        renderer.render( scene, camera );
+    };
+
+    animate();
+""";
+
+final String bottom = """</script></body></html>""";
