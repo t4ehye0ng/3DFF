@@ -81,6 +81,7 @@ abstract class HTMLBuilder {
     // TODO: shadow-intensity
     // TODO: shadow-softness
     // html.writeln('></model-viewer>');
+    html.write(lights);
     html.write(geometry2);
     html.write(animate);
     html.write(bottom);
@@ -89,11 +90,50 @@ abstract class HTMLBuilder {
   }
 }
 
-final String geometry2 = """
+final String geometry3 = """
     const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+    const material = new THREE.MeshPhongMaterial( { color: 0x005E99 } );  //0x00ff00
+    // const material = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: false } ); 
     const mesh = new THREE.Mesh( geometry, material );
     scene.add( mesh );
+""";
+
+final String geometry2 = """
+    const geometry = new THREE.SphereGeometry( 1, 12, 12 );
+    // const geometry = new THREE.BoxGeometry();
+    // const material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+    const material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );  0x005E99
+    const mesh = new THREE.Mesh( geometry, material );
+    scene.add( mesh );
+""";
+// const geometry = new THREE.BufferGeometry();
+// const vertices = new Float32Array( [
+//   -1.0, -1.0,  1.0,
+//   1.0, -1.0,  1.0,
+//   1.0,  1.0,  1.0,
+
+//   1.0,  1.0,  1.0,
+//   -1.0,  1.0,  1.0,
+//   -1.0, -1.0,  1.0
+// ] );
+//     const material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
+// geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+// const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+// const material = new THREE.MeshPhongMaterial();
+
+final String lights = """
+  const lights = [];
+  lights[0] = new THREE.PointLight( 0xffffff, 1, 0 );
+  lights[1] = new THREE.PointLight( 0xffffff, 1, 0 );
+  lights[2] = new THREE.PointLight( 0xffffff, 1, 0 );
+
+  lights[0].position.set( 0, 200, 0 );
+  lights[1].position.set( 100, 200, 100 );
+  lights[2].position.set( - 100, - 200, - 100 );
+
+  scene.add( lights[0] );
+  scene.add( lights[1] );
+  scene.add( lights[2] );
 """;
 
 final String animate = """
